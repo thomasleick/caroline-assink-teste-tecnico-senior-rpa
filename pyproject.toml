@@ -1,0 +1,45 @@
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "rpa-challenge"
+version = "0.1.0"
+description = "Teste Técnico - Desenvolvedor Senior RPA"
+authors = ["Thomas Leick <thomasleick@example.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = "^0.109.2"
+uvicorn = {extras = ["standard"], version = "^0.27.1"}
+sqlalchemy = {extras = ["asyncio"], version = "^2.0.25"}
+asyncpg = "^0.29.0"
+psycopg2-binary = "^2.9.9"
+alembic = "^1.13.1"
+pydantic = {extras = ["email"], version = "^2.6.1"}
+pydantic-settings = "^2.1.0"
+aio-pika = "^9.3.1"
+beautifulsoup4 = "^4.12.3"
+httpx = "^0.26.0"
+selenium = "^4.17.2"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.0.0"
+pytest-asyncio = "^0.23.4"
+pytest-cov = "^4.1.0"
+testcontainers = "^3.7.1"
+ruff = "^0.2.2"
+black = "^24.2.0"
+mypy = "^1.8.0"
+
+[tool.black]
+line-length = 88
+target-version = ['py311']
+
+[tool.ruff]
+line-length = 88
+target-version = "py311"
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
