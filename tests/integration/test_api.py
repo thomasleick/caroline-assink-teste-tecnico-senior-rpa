@@ -3,7 +3,6 @@ Integration Tests using Testcontainers.
 Spins up real PostgreSQL and RabbitMQ containers for realistic testing.
 Tests the full API flow: schedule job -> check status -> verify in DB.
 """
-import asyncio
 import uuid
 import pytest
 import pytest_asyncio
@@ -12,7 +11,6 @@ from httpx import AsyncClient, ASGITransport
 from testcontainers.postgres import PostgresContainer
 from testcontainers.rabbitmq import RabbitMqContainer
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
-from sqlalchemy import text
 
 from models.base import Base
 from models.job import Job, JobStatus

@@ -5,7 +5,6 @@ from concurrent.futures import ThreadPoolExecutor
 
 import aio_pika
 
-from core.config import settings
 from core.rabbitmq import get_rabbitmq_connection
 from core.database import async_session_maker
 from models.job import Job, JobStatus
