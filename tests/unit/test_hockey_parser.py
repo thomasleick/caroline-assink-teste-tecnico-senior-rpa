@@ -12,7 +12,7 @@ HOCKEY_HTML_SINGLE_PAGE = """
 <body>
 <table class="table">
   <tbody>
-    <tr>
+    <tr class="team">
       <td>Boston Bruins</td>
       <td>1990</td>
       <td>44</td>
@@ -23,7 +23,7 @@ HOCKEY_HTML_SINGLE_PAGE = """
       <td>264</td>
       <td>35</td>
     </tr>
-    <tr>
+    <tr class="team">
       <td>Calgary Flames</td>
       <td>1990</td>
       <td>46</td>

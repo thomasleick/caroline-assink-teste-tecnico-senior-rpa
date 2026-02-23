@@ -12,6 +12,7 @@ from httpx import AsyncClient, ASGITransport
 from testcontainers.postgres import PostgresContainer
 from testcontainers.rabbitmq import RabbitMqContainer
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
+from sqlalchemy.pool import NullPool
 
 from models.base import Base
 from models.job import Job, JobStatus
@@ -41,7 +42,7 @@ async def db_engine(postgres_container):
     sync_url = postgres_container.get_connection_url()
     async_url = sync_url.replace("postgresql+psycopg2://", "postgresql+asyncpg://")
 
-    engine = create_async_engine(async_url, echo=False)
+    engine = create_async_engine(async_url, echo=False, poolclass=NullPool)
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
     yield engine
@@ -177,7 +178,7 @@ async def test_get_job_results_returns_structure(api_client, db_session):
     create_resp = await api_client.post("/crawl/all")
     job_id = create_resp.json()["job_id"]
 
-    response = await api_client.get(f"/jobs/{job_id}/results")
+    response = await api_client.get(f"/results/{job_id}/results")
     assert response.status_code == 200
     data = response.json()
     assert "hockey" in data
