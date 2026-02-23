@@ -14,7 +14,7 @@ async def publish_message(queue_name: str, message: dict):
     connection = await get_rabbitmq_connection()
     async with connection:
         channel = await connection.channel()
-        _queue = await channel.declare_queue(queue_name, durable=True)
+        await channel.declare_queue(queue_name, durable=True)
 
         await channel.default_exchange.publish(
             aio_pika.Message(
