@@ -27,7 +27,7 @@ selenium = "^4.17.2"
 pytest = "^8.0.0"
 pytest-asyncio = "^0.23.4"
 pytest-cov = "^4.1.0"
-testcontainers = "^3.7.1"
+testcontainers = {extras = ["postgres", "rabbitmq"], version = "^3.7.1"}
 ruff = "^0.2.2"
 black = "^24.2.0"
 mypy = "^1.8.0"
@@ -43,3 +43,10 @@ target-version = "py311"
 [tool.mypy]
 python_version = "3.11"
 strict = true
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
