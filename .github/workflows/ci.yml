@@ -23,15 +23,16 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install dev dependencies
+      - name: Install dependencies
         run: |
-          pip install ruff black mypy
+          pip install poetry
+          poetry install --no-root
 
       - name: Run Ruff (lint)
-        run: ruff check .
+        run: poetry run ruff check .
 
       - name: Run Black (format check)
-        run: black --check .
+        run: poetry run black --check .
 
   unit-tests:
     name: Unit Tests
