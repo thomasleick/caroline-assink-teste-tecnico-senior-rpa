@@ -82,8 +82,8 @@ jobs:
         run: |
           poetry run pytest tests/integration/ -v
 
-  build-and-push:
-    name: Build & Push to GCR
+  build-push-deploy:
+    name: Build, Push and Deploy to Cloud Run
     runs-on: ubuntu-latest
     needs: integration-tests
     env:
@@ -122,3 +122,11 @@ jobs:
         run: |
           docker push $IMAGE_WORKER:latest
           docker push $IMAGE_WORKER:${{ github.sha }}
+      - name: Deploy API to Cloud Run
+        run: |
+          gcloud run deploy api \
+            --image $IMAGE_API:${{ github.sha }} \
+            --region $REGION \
+            --platform managed \
+            --allow-unauthenticated \
+            --project $PROJECT_ID
