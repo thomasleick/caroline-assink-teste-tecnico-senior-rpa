@@ -130,3 +130,15 @@ jobs:
             --platform managed \
             --allow-unauthenticated \
             --project $PROJECT_ID
+
+      - name: Deploy Worker as Private Service
+        run: |
+          gcloud run deploy worker \
+            --image $IMAGE_WORKER:${{ github.sha }} \
+            --region $REGION \
+            --platform managed \
+            --no-allow-unauthenticated \
+            --min-instances 1 \
+            --no-cpu-throttling \
+            --concurrency 1 \
+            --project $PROJECT_ID

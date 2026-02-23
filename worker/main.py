@@ -1,8 +1,10 @@
 import asyncio
 import json
 import logging
+import os
 from concurrent.futures import ThreadPoolExecutor
 
+from aiohttp import web
 import aio_pika
 
 from core.rabbitmq import get_rabbitmq_connection
@@ -88,7 +90,25 @@ async def process_job(message: aio_pika.abc.AbstractIncomingMessage) -> None:
             await _update_job_status(job_id, JobStatus.FAILED)
 
 
+async def health(request):
+    return web.Response(text="ok")
+
+
+async def start_health_server():
+    app = web.Application()
+    app.router.add_get("/", health)
+    port = int(os.environ.get("PORT", 8080))
+    runner = web.AppRunner(app)
+    await runner.setup()
+    site = web.TCPSite(runner, "0.0.0.0", port)
+    logger.info(f"Health check server starting on port {port}...")
+    await site.start()
+
+
 async def main() -> None:
+    # Start health check server
+    await start_health_server()
+
     logger.info("Connecting to RabbitMQ...")
     connection = await get_rabbitmq_connection()
     async with connection:
