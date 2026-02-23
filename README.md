@@ -1,200 +1,105 @@
-# Teste Técnico - Desenvolvedor Senior RPA
+# RPA Challenge API - Caroline Assink Teste Técnico Sênior RPA
 
-## Contexto
+Este projeto é um sistema em microserviços desenvolvido como desafio técnico para a vaga de Desenvolvedor(a) Sênior RPA. O sistema gerencia extrações de dados web complexos, orquestrados por uma fila e gravados em um banco de dados relacional (PostgreSQL).
 
-Você foi contratado para desenvolver um sistema de coleta de dados que extrai informações de múltiplas fontes web, gerencia jobs através de filas de mensagens, e disponibiliza os dados via API REST.
-
-## Objetivo
-
-Construir uma aplicação que:
-
-1. Colete dados de **duas fontes distintas** com diferentes estratégias de scraping
-2. Implemente um **sistema de filas com RabbitMQ** para gerenciamento de jobs
-3. Persista dados em **PostgreSQL**
-4. Exponha uma **API REST**
-5. Tenha **testes automatizados** (unitários e integração)
-6. Seja **containerizada** e executável via `docker-compose up`
-7. Tenha **CI/CD** com GitHub Actions
+## 🚀 Tecnologias Integradas
+- **FastAPI**: Endpoint Gateway para disparar e consultar jobs de crawling de forma assíncrona.
+- **RabbitMQ (`aio-pika`)**: Gerência das filas de extração entre a API e os robôs.
+- **Python / SQLAlchemy / asyncpg**: Banco relacional assíncrono para os registros.
+- **BeautifulSoup / httpx**: Robô de extração de tabelas HTML estáticas (Hockey Teams).
+- **Selenium (Headless Chrome)**: Robô de extração de conteúdo dinâmico carregado via chamadas AJAX invisíveis (Oscar Winning Films).
+- **Alembic**: Migrations de banco de dados (neste setup de container rodamos a criação procedural da própria API para resiliência).
+- **Testcontainers & Pytest**: Bateria de testes E2E do começo ao fim sem dependência isolada.
+- **Docker Compose**: Containerização homogênea e escalável para replicação instantânea.
 
 ---
 
-## Arquitetura Esperada
+## 🛠 Como Setar o Ambiente & Subir a Aplicação (Docker)
 
-```
-┌─────────────┐     ┌─────────────┐     ┌─────────────┐
-│   FastAPI   │────▶│  RabbitMQ   │────▶│   Workers   │
-│    (API)    │     │   (Queue)   │     │  (Crawlers) │
-└─────────────┘     └─────────────┘     └─────────────┘
-       │                                       │
-       │            ┌─────────────┐            │
-       └───────────▶│  PostgreSQL │◀───────────┘
-                    │    (Data)   │
-                    └─────────────┘
-```
+A forma mais rápida e limpa de rodar o projeto é utilizando a stack do `docker-compose`. Ele já constrói o banco de dados, a mensageria, o endpoint local da API e o container isolado do Worker com o Selenium pré-instalado (via pacote Alpine/Debian).
 
----
-
-## Sites Alvo
-
-### 1. Hockey Teams
-
-**URL:** https://www.scrapethissite.com/pages/forms/
-
-**Características:** Página HTML com paginação tradicional
-
-**Dados a coletar:**
-- Team Name
-- Year
-- Wins, Losses, OT Losses
-- Win %, Goals For (GF), Goals Against (GA), Goal Difference
-
----
-
-### 2. Oscar Winning Films
-
-**URL:** https://www.scrapethissite.com/pages/ajax-javascript/
-
-**Características:** Dados carregados via JavaScript/AJAX
-
-**Dados a coletar:**
-- Year, Title, Nominations, Awards, Best Picture
-
----
-
-## Requisitos Técnicos
-
-### Stack Obrigatória
-
-| Tecnologia | Uso |
-|------------|-----|
-| **FastAPI** | Framework web |
-| **Pydantic** | Validação e serialização |
-| **SQLAlchemy** | ORM para persistência |
-| **PostgreSQL** | Banco de dados |
-| **RabbitMQ** | Sistema de filas |
-| **Selenium** | Disponível para páginas dinâmicas |
-| **Docker + Docker Compose** | Containerização |
-| **GitHub Actions** | CI/CD |
-
----
-
-## Endpoints da API (Assíncronos)
-
-```
-# Agendar coletas
-POST /crawl/hockey         → Agenda coleta do Hockey (retorna job_id)
-POST /crawl/oscar          → Agenda coleta do Oscar (retorna job_id)
-POST /crawl/all            → Agenda ambas as coletas (retorna job_id)
-
-# Gerenciar jobs
-GET  /jobs                 → Lista todos os jobs
-GET  /jobs/{job_id}        → Status e detalhes de um job
-
-# Consultar resultados
-GET  /jobs/{job_id}/results → Resultados de um job específico
-GET  /results/hockey        → Todos os dados coletados de Hockey
-GET  /results/oscar         → Todos os dados coletados de Oscar
-```
-
-**Fluxo assíncrono:**
-1. `POST /crawl/*` publica mensagem no RabbitMQ e retorna `job_id` imediatamente
-2. Worker consome a mensagem e executa o crawling
-3. `GET /jobs/{job_id}` para verificar status (pending, running, completed, failed)
-4. `GET /jobs/{job_id}/results` para obter os dados coletados por aquele job
-
----
-
-## Testes
-
-| Tipo | Descrição |
-|------|-----------|
-| **Unitários** | Testar lógica de negócio, parsers, validações |
-| **Integração** | Testar API, filas e banco usando Testcontainers |
-
-**Não é necessário** testar crawling real contra os sites.
-
----
-
-## CI/CD com GitHub Actions
-
-O pipeline deve executar:
-
-1. **Lint** - Verificar código (ruff, black, etc.)
-2. **Testes unitários** - pytest
-3. **Testes de integração** - pytest com Testcontainers
-4. **Build** - Construir imagem Docker
-5. **Push** - Enviar imagem para Google Container Registry (GCR)
-
----
-
-## Critérios de Avaliação
-
-| Critério | Peso |
-|----------|------|
-| **Arquitetura** | Alto - Design, separação de responsabilidades, uso do RabbitMQ |
-| **Qualidade de código** | Alto - SOLID, tipagem, boas práticas |
-| **Funcionamento** | Alto - A solução deve funcionar corretamente |
-| **Testes** | Alto - Unitários e integração com Testcontainers |
-| **CI/CD** | Alto - Pipeline funcional com push para GCR |
-| **Tratamento de erros** | Médio - Robustez e resiliência |
-| **Documentação** | Baixo |
-
----
-
-## Ambiente de Desenvolvimento
-
-### Nix + direnv (Recomendado - Linux)
-
-#### 1. Instalar Nix
+Abra o seu terminal na raiz deste projeto e simplesmente digite:
 
 ```bash
-sh <(curl --proto '=https' --tlsv1.2 -L https://nixos.org/nix/install) --daemon
+docker compose up -d --build
 ```
 
-#### 2. Habilitar Flakes
+O comando irá orquestrar e estabilizar:
+1. `teste-tecnico-senior-rpa-db-1`: O banco **PostgreSQL** (Rodando internamente).
+2. `teste-tecnico-senior-rpa-rabbitmq-1`: A fila de processos **RabbitMQ** (Rodando internamente).
+3. `teste-tecnico-senior-rpa-worker-1`: O **Web Scraper Worker** com Selenium Webdriver (Aguardando Jobs).
+4. `teste-tecnico-senior-rpa-api-1`: O Web Server **FastAPI** na porta 8000 da sua máquina!
 
-Adicione ao `~/.config/nix/nix.conf`:
+Pronto! Seu ambiente está configurado e as tabelas do banco de dados já foram criadas assim que a API ligou pela primeira vez.
 
-```
-experimental-features = nix-command flakes
-```
+## 📄 Documentação da API com Swagger UI Automática
 
-#### 3. Instalar direnv
+O **FastAPI** disponibiliza por padrão uma interface visual documentada (Swagger). Com a aplicação rodando via docker-compose, abra no seu navegador:
 
+🔗 **[Acessar a Documentação Interativa: http://localhost:8000/docs](http://localhost:8000/docs)**
+
+No Swagger UI você pode simular botões no navegador e ver a resposta de todas as rotas que criei para o desafio, sem precisar tocar em uma linha de código, testando a extração do RPA apertando 1 botão no navegador.
+
+## 🧑‍💻 Como Testar Manualmente a Extracão na Garra (CURL)
+
+Se preferir validar os endpoints nativamente via terminal simulando o frontend (após realizar o `docker compose up -d`):
+
+**1. Disparar todos os crawlers para começarem o scrapping ao invés de um a um:**
 ```bash
-# Debian/Ubuntu
-sudo apt install direnv
-
-# Fedora
-sudo dnf install direnv
-
-# Arch
-sudo pacman -S direnv
+curl -X POST http://localhost:8000/crawl/all
+```
+Resposta esperada:
+```json
+{
+    "job_id": "848a2ebc-f3eb-4c36-b60b-01754b992476",
+    "message": "Combined hockey and oscar crawling task scheduled."
+}
 ```
 
-Adicione ao seu shell (`~/.bashrc` ou `~/.zshrc`):
-
+**2. Acompanhar como está o andamento da execução RPA em segundo plano:**
 ```bash
-eval "$(direnv hook bash)"  # ou zsh
+# Pegue o `job_id` que veio na resposta anterior e use neste comando
+curl http://localhost:8000/jobs/848a2ebc-f3eb-4c36-b60b-01754b992476
+```
+Resposta esperada (verifique se já está completado):
+```json
+{
+    "id": "848a2ebc-f3eb-4c36-b60b-01754b992476",
+    "status": "completed",
+    "created_at": "2026-02-23T20:17:45Z",
+    "updated_at": "2026-02-23T20:17:55Z"
+}
 ```
 
-#### 4. Rodar
-
-O `.envrc` e `flake.nix` já vêm prontos no repositório. Basta permitir o direnv e o ambiente será carregado automaticamente:
-
+**3. Visualizar e resgatar a tabela estruturada já extraída no PostgreSQL:**
 ```bash
-direnv allow
+# Pegue o mesmo `job_id` para baixar os JSON extraídos 
+curl http://localhost:8000/results/848a2ebc-f3eb-4c36-b60b-01754b992476/results
 ```
 
-Commite o `flake.lock` no seu repositório.
+Se quiser ver o scraping isoladamente acontecendo "por cima do ombro do robô" visualizando os prints e extrações do console do Docker sendo populadas:
+```bash
+docker compose logs -f worker
+```
 
 ---
 
-## Regras
+## 🧪 Rodando os Testes Automatizados (Locais via Pytest + Testcontainers)
 
-1. **Entrega:** Fork deste repositório
-2. **Dúvidas:** ti@bpcreditos.com.br | gabrielpelizzaro@gmail.com
+A suíte de testes do projeto já cria novos containers isolados (usando a lib `testcontainers`) e destrói eles no fim da execução da suíte E2E do **Pytest**, garantindo total fiducialidade ao teste que simula o usuário, passando pelos routers e confirmando a persistência exata no banco relacional. Nenhum mock leviano, teste real e ponta a ponta construído! 
 
----
+Para rodá-los na sua máquina física, nós usaremos o Gerenciador de Pacotes do Projeto (Poetry):
 
-**Queremos ver como você arquiteta soluções, não apenas como escreve código.**
+1. **Ative a instalação local das dependências:**
+```bash
+poetry install
+```
+
+2. **Rode o pacote test-suite:**
+```bash
+poetry run pytest -v
+```
+
+Isso fará com que o framework de testes crie conteineres temporários de DB e Mensageria pela infra física, e corra todos os cenários implementados. Todos os indicadores devem fechar 100% de precisão "GREEN" em pass rate!
+
+_Construído com 💪 e muita orquestração assíncrona._
