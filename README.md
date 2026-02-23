@@ -1,54 +1,53 @@
-# RPA Challenge API - Caroline Assink Teste Técnico Sênior RPA
+# RPA Challenge API
 
-Este projeto é um sistema em microserviços desenvolvido como desafio técnico para a vaga de Desenvolvedor(a) Sênior RPA. O sistema gerencia extrações de dados web complexos, orquestrados por uma fila e gravados em um banco de dados relacional (PostgreSQL).
+Este projeto é um sistema baseado em microsserviços desenvolvido como desafio técnico para a vaga de Desenvolvedor(a) Sênior RPA. A aplicação gerencia a coleta de dados web com diferentes níveis de complexidade, orquestrados por uma fila de mensagens e armazenados de forma estruturada em um banco de dados relacional.
 
 ## 🚀 Tecnologias Integradas
-- **FastAPI**: Endpoint Gateway para disparar e consultar jobs de crawling de forma assíncrona.
-- **RabbitMQ (`aio-pika`)**: Gerência das filas de extração entre a API e os robôs.
-- **Python / SQLAlchemy / asyncpg**: Banco relacional assíncrono para os registros.
-- **BeautifulSoup / httpx**: Robô de extração de tabelas HTML estáticas (Hockey Teams).
-- **Selenium (Headless Chrome)**: Robô de extração de conteúdo dinâmico carregado via chamadas AJAX invisíveis (Oscar Winning Films).
-- **Alembic**: Migrations de banco de dados (neste setup de container rodamos a criação procedural da própria API para resiliência).
-- **Testcontainers & Pytest**: Bateria de testes E2E do começo ao fim sem dependência isolada.
-- **Docker Compose**: Containerização homogênea e escalável para replicação instantânea.
+- **FastAPI**: Gateway assíncrono para o registro das solicitações HTTP, retornando identificadores (UUIDs) para monitoramento do processamento e consulta do banco de dados.
+- **RabbitMQ (`aio-pika`)**: Intermediador e gestor das filas das mensagens processadas, permitindo a comunicação entre a API e os workers de extração sem bloqueio das validações (Non-Blocking IO).
+- **PostgreSQL (SQLAlchemy & asyncpg)**: Banco de dados relacional e ORM para a persistência assíncrona, abstraindo transações de infraestrutura e registrando detalhadamente os metadados dos jobs agendados.
+- **BeautifulSoup / httpx**: Worker projetado para realizar a leitura de tabelas HTML estáticas com tratamento de paginação síncrona/HTTP (Hockey Teams).
+- **Selenium (Headless Chrome)**: Worker emulando as funções de um navegador Chromium headless para interagir com elementos visuais injetados na DOM através de AJAX. Necessário para ler componentes JavaScript dinâmicos (Oscar Winning Films).
+- **Docker e Docker Compose**: Arquitetura adotada para conteinerização de todas as dependências, banco de dados e agentes da plataforma num fluxo de comando unificado.
+- **Testcontainers & Pytest**: Frameworks utilizados em conjunto na rotina de CI/CD para promover testes ponta a ponta (E2E) consistentes utilizando infraestrutura de contêineres temporária em tempo de execução para os simuladores.
 
 ---
 
-## 🛠 Como Setar o Ambiente & Subir a Aplicação (Docker)
+## 🛠 Como Configurar o Ambiente e Executar a Inicialização (Docker)
 
-A forma mais rápida e limpa de rodar o projeto é utilizando a stack do `docker-compose`. Ele já constrói o banco de dados, a mensageria, o endpoint local da API e o container isolado do Worker com o Selenium pré-instalado (via pacote Alpine/Debian).
+A principal e recomendada maneira de inicializar o repositório é via orquestração nativa com `docker-compose`. Este utilitário construirá e resolverá dependências em conjunto (RabbitMQ, Postgres, Worker, API e Volumes), entregando uma experiência "Plug and Play".
 
-Abra o seu terminal na raiz deste projeto e simplesmente digite:
+A partir do diretório raiz, execute:
 
 ```bash
 docker compose up -d --build
 ```
 
-O comando irá orquestrar e estabilizar:
-1. `teste-tecnico-senior-rpa-db-1`: O banco **PostgreSQL** (Rodando internamente).
-2. `teste-tecnico-senior-rpa-rabbitmq-1`: A fila de processos **RabbitMQ** (Rodando internamente).
-3. `teste-tecnico-senior-rpa-worker-1`: O **Web Scraper Worker** com Selenium Webdriver (Aguardando Jobs).
-4. `teste-tecnico-senior-rpa-api-1`: O Web Server **FastAPI** na porta 8000 da sua máquina!
+Neste fluxo, quatro serviços serão ativados:
+1. `teste-tecnico-senior-rpa-db-1`: O serviço em background para o **PostgreSQL**.
+2. `teste-tecnico-senior-rpa-rabbitmq-1`: O provedor interno de filas operando no **RabbitMQ**.
+3. `teste-tecnico-senior-rpa-worker-1`: O worker operando em Debian/Alpine e com a abstração do Crawler e do Chromium Headless inicializada e pronta para consumo da fila.
+4. `teste-tecnico-senior-rpa-api-1`: A **FastAPI** disponibilizada nativamente em modo hot-reload na porta interna `8000` localhost.
 
-Pronto! Seu ambiente está configurado e as tabelas do banco de dados já foram criadas assim que a API ligou pela primeira vez.
+As tabelas e diagramas relacionais são instanciados por um script inserido na hierarquia de Eventos do FastAPI, operando em tempo de inicialização (lifespan) sem demandas posteriores e manuais do Alembic.
 
-## 📄 Documentação da API com Swagger UI Automática
+## 📄 Documentação Técnica e Especificação com Swagger UI (OpenAPI)
 
-O **FastAPI** disponibiliza por padrão uma interface visual documentada (Swagger). Com a aplicação rodando via docker-compose, abra no seu navegador:
+Uma vez que o orquestrador `docker-compose` atestar saúde nas conexões dos serviços, é possível usufruir de uma rica interface de modelagem padronizada fornecida pelo Swagger, integrada às dependências da FastAPI:
 
-🔗 **[Acessar a Documentação Interativa: http://localhost:8000/docs](http://localhost:8000/docs)**
+🔗 **[Acesso Gráfico Interativo aos Recursos: http://localhost:8000/docs](http://localhost:8000/docs)**
 
-No Swagger UI você pode simular botões no navegador e ver a resposta de todas as rotas que criei para o desafio, sem precisar tocar em uma linha de código, testando a extração do RPA apertando 1 botão no navegador.
+Utilizando o painel de rotas OpenAPI, os end-points de coleta paralela, listagem e requisições isoladas podem ser modelados, depurados e estruturados via interface nativa, não sendo obrigatória a verificação pura via terminal.
 
-## 🧑‍💻 Como Testar Manualmente a Extracão na Garra (CURL)
+## 🧑‍💻 Metodologia de Interação via Terminal (cURL)
 
-Se preferir validar os endpoints nativamente via terminal simulando o frontend (após realizar o `docker compose up -d`):
+Os protocolos de consulta expostos via HTTP podem ser confirmados através de requisições enviadas ao container da aplicação. O exemplo abaixo simula a rotina diária de requisições isoladas.
 
-**1. Disparar todos os crawlers para começarem o scrapping ao invés de um a um:**
+**1. Solicitar o agrupamento e carga de todos os Scrapers (Oscar e Hockey) paralelamente:**
 ```bash
 curl -X POST http://localhost:8000/crawl/all
 ```
-Resposta esperada:
+Resposta da Solicitação (`HTTP 200`):
 ```json
 {
     "job_id": "848a2ebc-f3eb-4c36-b60b-01754b992476",
@@ -56,12 +55,12 @@ Resposta esperada:
 }
 ```
 
-**2. Acompanhar como está o andamento da execução RPA em segundo plano:**
+**2. Consultar as Tabelas e Validar a Orquestração do Estado do Job:**
 ```bash
-# Pegue o `job_id` que veio na resposta anterior e use neste comando
+# O retorno contém o Status atual da Orquestração. Troque o UUID inserido:
 curl http://localhost:8000/jobs/848a2ebc-f3eb-4c36-b60b-01754b992476
 ```
-Resposta esperada (verifique se já está completado):
+Exemplo de Resposta do Sistema:
 ```json
 {
     "id": "848a2ebc-f3eb-4c36-b60b-01754b992476",
@@ -71,35 +70,33 @@ Resposta esperada (verifique se já está completado):
 }
 ```
 
-**3. Visualizar e resgatar a tabela estruturada já extraída no PostgreSQL:**
+**3. Adquirir o Resultado Armazenado via Consulta SQL do Banco (Representada pela API):**
 ```bash
-# Pegue o mesmo `job_id` para baixar os JSON extraídos 
+# Quando o status do job for 'completed', requisite os valores
 curl http://localhost:8000/results/848a2ebc-f3eb-4c36-b60b-01754b992476/results
 ```
 
-Se quiser ver o scraping isoladamente acontecendo "por cima do ombro do robô" visualizando os prints e extrações do console do Docker sendo populadas:
+Para monitoria avançada das coletas em andamento ocorrendo de forma não iterativa por debaixo dos panos, utilize:
 ```bash
 docker compose logs -f worker
 ```
 
 ---
 
-## 🧪 Rodando os Testes Automatizados (Locais via Pytest + Testcontainers)
+## 🧪 Validando a Lógica Interna Através dos Testes Automatizados (Pytest)
 
-A suíte de testes do projeto já cria novos containers isolados (usando a lib `testcontainers`) e destrói eles no fim da execução da suíte E2E do **Pytest**, garantindo total fiducialidade ao teste que simula o usuário, passando pelos routers e confirmando a persistência exata no banco relacional. Nenhum mock leviano, teste real e ponta a ponta construído! 
+A aplicação tira extenso proveito da modelagem proporcionada pelos contêineres nativos dinâmicos do módulo `testcontainers`. Em decorrência dessa utilidade, o encadeamento das lógicas no QA pode prescindir o falso Mockup no ORM do banco, utilizando infraestrutura idêntica ao da Orquestração física sem sobrepor as operações locais nem necessitar manipulações em background.
 
-Para rodá-los na sua máquina física, nós usaremos o Gerenciador de Pacotes do Projeto (Poetry):
+Recomendamos o emprego direto através do gerenciador de dependências oficial fornecido ao projeto (Poetry).
 
-1. **Ative a instalação local das dependências:**
+1. **Procedimento de Instalação e Sincronismo dos Pacotes Internos:**
 ```bash
 poetry install
 ```
 
-2. **Rode o pacote test-suite:**
+2. **Início Global e Paralelo da Suíte Unitária Integradora de QA:**
 ```bash
 poetry run pytest -v
 ```
 
-Isso fará com que o framework de testes crie conteineres temporários de DB e Mensageria pela infra física, e corra todos os cenários implementados. Todos os indicadores devem fechar 100% de precisão "GREEN" em pass rate!
-
-_Construído com 💪 e muita orquestração assíncrona._
+Ao comando exposto, as ferramentas proverão os resultados e resiliências com validações de lógica local de parser de documentação HTML, formatação interna dos esquemas da API e subida dos clusters do Postgres e Queue garantindo a completa finalização correta do projeto.
