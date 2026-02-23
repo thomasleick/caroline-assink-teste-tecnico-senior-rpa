@@ -2,6 +2,7 @@
 Hockey Teams Crawler - Strategy: HTML scraping with httpx + BeautifulSoup.
 Target: https://www.scrapethissite.com/pages/forms/
 """
+
 import logging
 import re
 from typing import List, Dict, Any
@@ -41,17 +42,19 @@ def _parse_page(html: str) -> List[Dict[str, Any]]:
         cells = row.find_all("td")
         if len(cells) < 9:
             continue
-        teams.append({
-            "team_name": cells[0].get_text(strip=True),
-            "year": _parse_int(cells[1].get_text()),
-            "wins": _parse_int(cells[2].get_text()),
-            "losses": _parse_int(cells[3].get_text()),
-            "ot_losses": _parse_int(cells[4].get_text()),
-            "win_percentage": _parse_float(cells[5].get_text()),
-            "goals_for": _parse_int(cells[6].get_text()),
-            "goals_against": _parse_int(cells[7].get_text()),
-            "goal_difference": _parse_int(cells[8].get_text()),
-        })
+        teams.append(
+            {
+                "team_name": cells[0].get_text(strip=True),
+                "year": _parse_int(cells[1].get_text()),
+                "wins": _parse_int(cells[2].get_text()),
+                "losses": _parse_int(cells[3].get_text()),
+                "ot_losses": _parse_int(cells[4].get_text()),
+                "win_percentage": _parse_float(cells[5].get_text()),
+                "goals_for": _parse_int(cells[6].get_text()),
+                "goals_against": _parse_int(cells[7].get_text()),
+                "goal_difference": _parse_int(cells[8].get_text()),
+            }
+        )
     return teams
 
 

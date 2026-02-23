@@ -2,6 +2,7 @@
 Unit tests for the Hockey crawler's HTML parsing logic.
 We mock HTTP responses to avoid real network calls.
 """
+
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -45,12 +46,14 @@ HOCKEY_HTML_SINGLE_PAGE = """
 
 def test_parse_page_returns_correct_number_of_teams():
     from worker.crawlers.hockey import _parse_page
+
     teams = _parse_page(HOCKEY_HTML_SINGLE_PAGE)
     assert len(teams) == 2
 
 
 def test_parse_page_extracts_correct_values():
     from worker.crawlers.hockey import _parse_page
+
     teams = _parse_page(HOCKEY_HTML_SINGLE_PAGE)
     assert teams[0]["team_name"] == "Boston Bruins"
     assert teams[0]["year"] == 1990
@@ -65,6 +68,7 @@ def test_parse_page_extracts_correct_values():
 
 def test_parse_page_handles_empty_tbody():
     from worker.crawlers.hockey import _parse_page
+
     html = "<html><body><table class='table'><tbody></tbody></table></body></html>"
     teams = _parse_page(html)
     assert teams == []
@@ -72,12 +76,14 @@ def test_parse_page_handles_empty_tbody():
 
 def test_get_total_pages_single():
     from worker.crawlers.hockey import _get_total_pages
+
     total = _get_total_pages(HOCKEY_HTML_SINGLE_PAGE)
     assert total == 1
 
 
 def test_get_total_pages_multiple():
     from worker.crawlers.hockey import _get_total_pages
+
     html = """
     <html><body>
     <ul class="pagination">
@@ -92,17 +98,20 @@ def test_get_total_pages_multiple():
 
 def test_parse_int_valid():
     from worker.crawlers.hockey import _parse_int
+
     assert _parse_int("  42  ") == 42
 
 
 def test_parse_int_invalid():
     from worker.crawlers.hockey import _parse_int
+
     assert _parse_int("N/A") is None
     assert _parse_int("") is None
 
 
 def test_parse_float_valid():
     from worker.crawlers.hockey import _parse_float
+
     assert abs(_parse_float("  0.500  ") - 0.5) < 1e-9
 
 

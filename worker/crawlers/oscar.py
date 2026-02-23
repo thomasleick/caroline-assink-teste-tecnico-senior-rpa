@@ -5,6 +5,7 @@ Target: https://www.scrapethissite.com/pages/ajax-javascript/
 The Oscar page loads film data dynamically by clicking year buttons and waiting
 for AJAX responses to populate the table. We use Selenium to automate this.
 """
+
 import logging
 import time
 from typing import List, Dict, Any
@@ -38,17 +39,25 @@ def _parse_films_from_table(driver: webdriver.Chrome) -> List[Dict[str, Any]]:
     for row in rows:
         try:
             title = row.find_element(By.CSS_SELECTOR, "td.film-title").text.strip()
-            nominations = int(row.find_element(By.CSS_SELECTOR, "td.film-nominations").text.strip())
-            awards = int(row.find_element(By.CSS_SELECTOR, "td.film-awards").text.strip())
-            best_picture_el = row.find_elements(By.CSS_SELECTOR, "td.film-best-picture i.glyphicon-ok")
+            nominations = int(
+                row.find_element(By.CSS_SELECTOR, "td.film-nominations").text.strip()
+            )
+            awards = int(
+                row.find_element(By.CSS_SELECTOR, "td.film-awards").text.strip()
+            )
+            best_picture_el = row.find_elements(
+                By.CSS_SELECTOR, "td.film-best-picture i.glyphicon-ok"
+            )
             best_picture = len(best_picture_el) > 0
 
-            films.append({
-                "title": title,
-                "nominations": nominations,
-                "awards": awards,
-                "best_picture": best_picture,
-            })
+            films.append(
+                {
+                    "title": title,
+                    "nominations": nominations,
+                    "awards": awards,
+                    "best_picture": best_picture,
+                }
+            )
         except Exception as e:
             logger.warning(f"Could not parse film row: {e}")
     return films
@@ -69,7 +78,9 @@ def scrape_oscar_films() -> List[Dict[str, Any]]:
 
         # Wait for year buttons to appear
         wait = WebDriverWait(driver, 15)
-        wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, "a.year-link")))
+        wait.until(
+            EC.presence_of_all_elements_located((By.CSS_SELECTOR, "a.year-link"))
+        )
 
         # Collect all year buttons text and hrefs
         year_buttons = driver.find_elements(By.CSS_SELECTOR, "a.year-link")
@@ -79,11 +90,18 @@ def scrape_oscar_films() -> List[Dict[str, Any]]:
         for year in years:
             logger.info(f"Clicking year: {year}")
             # Re-locate buttons each iteration to avoid stale elements
-            btn = driver.find_element(By.XPATH, f"//a[@class='year-link' and normalize-space(text())='{year}']")
+            btn = driver.find_element(
+                By.XPATH,
+                f"//a[@class='year-link' and normalize-space(text())='{year}']",
+            )
             btn.click()
 
             # Wait for the table to load with film rows
-            wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "table.table tbody tr.film")))
+            wait.until(
+                EC.presence_of_element_located(
+                    (By.CSS_SELECTOR, "table.table tbody tr.film")
+                )
+            )
             time.sleep(0.5)  # Small buffer for full render
 
             films = _parse_films_from_table(driver)

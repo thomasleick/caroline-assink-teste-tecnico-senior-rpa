@@ -3,9 +3,11 @@ from typing import Optional
 from datetime import datetime
 from models.job import JobStatus
 
+
 class JobCreateResponse(BaseModel):
     job_id: str
     message: str
+
 
 class JobResponse(BaseModel):
     id: str
@@ -13,6 +15,7 @@ class JobResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
     model_config = ConfigDict(from_attributes=True)
+
 
 class HockeyTeamResponse(BaseModel):
     id: int
@@ -27,6 +30,7 @@ class HockeyTeamResponse(BaseModel):
     goals_against: Optional[int] = None
     goal_difference: Optional[int] = None
     model_config = ConfigDict(from_attributes=True)
+
 
 class OscarFilmResponse(BaseModel):
     id: int

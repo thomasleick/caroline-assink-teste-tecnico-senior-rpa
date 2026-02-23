@@ -47,6 +47,7 @@ async def _run_oscar(job_id: str) -> None:
     logger.info(f"[{job_id}] Starting Oscar scraper (Selenium)...")
     # Selenium is synchronous; run in thread pool to avoid blocking event loop
     from typing import cast, List, Dict, Any
+
     loop = asyncio.get_running_loop()
     films: List[Dict[str, Any]] = cast(
         List[Dict[str, Any]],
@@ -101,4 +102,3 @@ async def main() -> None:
 
 if __name__ == "__main__":
     asyncio.run(main())
-

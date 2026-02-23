@@ -3,6 +3,7 @@ Integration Tests using Testcontainers.
 Spins up real PostgreSQL and RabbitMQ containers for realistic testing.
 Tests the full API flow: schedule job -> check status -> verify in DB.
 """
+
 import uuid
 import pytest
 import pytest_asyncio
@@ -19,6 +20,7 @@ from models.job import Job, JobStatus
 # ─────────────────────────────────────────────
 # Fixtures
 # ─────────────────────────────────────────────
+
 
 @pytest.fixture(scope="session")
 def postgres_container():
@@ -49,7 +51,9 @@ async def db_engine(postgres_container):
 @pytest_asyncio.fixture
 async def db_session(db_engine):
     """Yield a scoped session for each test, rolling back after."""
-    session_factory = async_sessionmaker(db_engine, class_=AsyncSession, expire_on_commit=False)
+    session_factory = async_sessionmaker(
+        db_engine, class_=AsyncSession, expire_on_commit=False
+    )
     async with session_factory() as session:
         yield session
 
@@ -62,6 +66,7 @@ async def api_client(postgres_container, rabbitmq_container, db_engine):
     """
     # Patch settings before importing the app so all dependencies use containers
     import os
+
     sync_url = postgres_container.get_connection_url()
     async_url = sync_url.replace("postgresql+psycopg2://", "postgresql+asyncpg://")
     rmq_url = f"amqp://guest:guest@{rabbitmq_container.get_container_host_ip()}:{rabbitmq_container.get_exposed_port(5672)}/"
@@ -74,7 +79,9 @@ async def api_client(postgres_container, rabbitmq_container, db_engine):
     from core.database import get_db
     from sqlalchemy.ext.asyncio import async_sessionmaker
 
-    session_factory = async_sessionmaker(db_engine, class_=AsyncSession, expire_on_commit=False)
+    session_factory = async_sessionmaker(
+        db_engine, class_=AsyncSession, expire_on_commit=False
+    )
 
     async def override_get_db():
         async with session_factory() as session:
@@ -92,6 +99,7 @@ async def api_client(postgres_container, rabbitmq_container, db_engine):
 # ─────────────────────────────────────────────
 # Tests
 # ─────────────────────────────────────────────
+
 
 @pytest.mark.asyncio
 async def test_health_endpoint(api_client):

@@ -4,8 +4,10 @@ import enum
 from sqlalchemy import Column, String, DateTime, Enum
 from .base import Base
 
+
 def _utcnow():
     return datetime.now(timezone.utc)
+
 
 class JobStatus(str, enum.Enum):
     PENDING = "pending"
@@ -13,10 +15,13 @@ class JobStatus(str, enum.Enum):
     COMPLETED = "completed"
     FAILED = "failed"
 
+
 class Job(Base):
     __tablename__ = "jobs"
 
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     status = Column(Enum(JobStatus), default=JobStatus.PENDING, nullable=False)
     created_at = Column(DateTime(timezone=True), default=_utcnow, nullable=False)
-    updated_at = Column(DateTime(timezone=True), default=_utcnow, onupdate=_utcnow, nullable=False)
+    updated_at = Column(
+        DateTime(timezone=True), default=_utcnow, onupdate=_utcnow, nullable=False
+    )

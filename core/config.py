@@ -1,6 +1,7 @@
 from pydantic_settings import BaseSettings
 from pydantic import ConfigDict
 
+
 class Settings(BaseSettings):
     model_config = ConfigDict(env_file=".env")
 
@@ -15,5 +16,6 @@ class Settings(BaseSettings):
     # Target URLs
     HOCKEY_URL: str = "https://www.scrapethissite.com/pages/forms/"
     OSCAR_URL: str = "https://www.scrapethissite.com/pages/ajax-javascript/"
+
 
 settings = Settings()
