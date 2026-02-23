@@ -35,7 +35,7 @@ def _parse_float(value: str) -> float | None:
 def _parse_page(html: str) -> List[Dict[str, Any]]:
     """Parse a single HTML page and return a list of team dicts."""
     soup = BeautifulSoup(html, "html.parser")
-    rows = soup.select("table.table tbody tr")
+    rows = soup.select("tr.team")
     teams = []
     for row in rows:
         cells = row.find_all("td")

@@ -3,7 +3,7 @@ Unit tests for Pydantic API schemas.
 Validate that the schema types coerce and validate correctly.
 """
 import pytest
-from datetime import datetime
+from datetime import datetime, timezone
 from models.job import JobStatus
 from api.schemas import (
     JobCreateResponse,
@@ -20,7 +20,7 @@ def test_job_create_response_fields():
 
 
 def test_job_response_from_orm():
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
     resp = JobResponse(
         id="abc-123",
         status=JobStatus.PENDING,

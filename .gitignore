@@ -1,1 +1,91 @@
-.direnv
+# =========================
+# Python
+# =========================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Build
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# =========================
+# Poetry
+# =========================
+# MANTER versionado:
+# pyproject.toml
+# poetry.lock
+
+# Virtualenv (caso use in-project venv)
+.venv/
+venv/
+env/
+
+# =========================
+# Environment
+# =========================
+.env
+.env.*
+!.env.example
+
+# =========================
+# Logs
+# =========================
+*.log
+
+# =========================
+# Test / Coverage
+# =========================
+.pytest_cache/
+.coverage
+htmlcov/
+coverage.xml
+
+# =========================
+# Type check / Lint
+# =========================
+.mypy_cache/
+.ruff_cache/
+.pyre/
+.pytype/
+
+# =========================
+# IDE
+# =========================
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# =========================
+# OS
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# Docker
+# =========================
+docker-compose.override.yml
+*.pid
+
+# =========================
+# RabbitMQ
+# =========================
+rabbitmq-data/
+rabbitmq.log
+
+# =========================
+# Kafka / Zookeeper
+# =========================
+kafka-logs/
+zookeeper-data/
+
+# =========================
+# SQLite
+# =========================
+*.sqlite3
+*.db
