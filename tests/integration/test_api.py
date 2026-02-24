@@ -75,6 +75,10 @@ async def api_client(postgres_container, rabbitmq_container, db_engine):
     os.environ["DATABASE_URL"] = async_url
     os.environ["RABBITMQ_URL"] = rmq_url
 
+    from core.config import settings
+    settings.DATABASE_URL = async_url
+    settings.RABBITMQ_URL = rmq_url
+
     # Now import the app after env vars are set
     from api.main import app
     from core.database import get_db
