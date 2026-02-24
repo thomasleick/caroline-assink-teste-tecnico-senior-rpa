@@ -11,10 +11,14 @@ class Settings(BaseSettings):
     PROJECT_NAME: str = "RPA Challenge"
 
     # DB Configuration
-    DATABASE_URL: str = "postgresql+asyncpg://postgres:3%40%7CDh%7DL3%228%5Ey%3B%25Rc@34.95.152.162:5432/rpa"
+    DATABASE_URL: str = (
+        "postgresql+asyncpg://postgres:3%40%7CDh%7DL3%228%5Ey%3B%25Rc@34.95.152.162:5432/rpa"
+    )
 
     # RabbitMQ Configuration
-    RABBITMQ_URL: str = "amqp://guest:guest@localhost:5672/"
+    RABBITMQ_URL: str = (
+        "amqps://wnhsexac:wa-neOo-CGZv4VLBLc6eNOwza4uN55cB@porpoise.rmq.cloudamqp.com/wnhsexac"
+    )
 
     # Target URLs
     HOCKEY_URL: str = "https://www.scrapethissite.com/pages/forms/"
@@ -36,8 +40,8 @@ class Settings(BaseSettings):
     @classmethod
     def validate_rabbitmq_url(cls, v: str) -> str:
         if not v or not isinstance(v, str) or v.strip() == "":
-            logger.warning("RABBITMQ_URL is empty. Falling back to default local URL.")
-            return "amqp://guest:guest@localhost:5672/"
+            logger.warning("RABBITMQ_URL is empty. Falling back to default cloud URL.")
+            return "amqps://wnhsexac:wa-neOo-CGZv4VLBLc6eNOwza4uN55cB@porpoise.rmq.cloudamqp.com/wnhsexac"
         return v
 
 
