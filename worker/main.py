@@ -1,10 +1,9 @@
 import asyncio
 import json
 import logging
-import os
 from concurrent.futures import ThreadPoolExecutor
 
-from aiohttp import web
+from fastapi import FastAPI
 import aio_pika
 
 from core.rabbitmq import get_rabbitmq_connection
@@ -25,6 +24,8 @@ QUEUE_NAME = "rpa_jobs_queue"
 
 # Thread pool for running sync Selenium scraper without blocking event loop
 _executor = ThreadPoolExecutor(max_workers=2)
+
+app = FastAPI(title="RPA Worker Health Check")
 
 
 async def _update_job_status(job_id: str, status: JobStatus) -> None:
@@ -90,27 +91,13 @@ async def process_job(message: aio_pika.abc.AbstractIncomingMessage) -> None:
             await _update_job_status(job_id, JobStatus.FAILED)
 
 
-async def health(request):
-    return web.Response(text="ok")
+@app.get("/")
+async def health():
+    return {"status": "ok"}
 
 
-async def start_health_server():
-    app = web.Application()
-    app.router.add_get("/", health)
-    port = int(os.environ.get("PORT", 8080))
-    runner = web.AppRunner(app)
-    await runner.setup()
-    site = web.TCPSite(runner, "0.0.0.0", port)
-    logger.info(f"Health check server starting on port {port}...")
-    await site.start()
-
-
-async def main() -> None:
-    # Start health check server
-    await start_health_server()
-
+async def run_worker() -> None:
     logger.info("Connecting to RabbitMQ...")
-
     retry_interval = 5
     while True:
         try:
@@ -129,5 +116,7 @@ async def main() -> None:
             await asyncio.sleep(retry_interval)
 
 
-if __name__ == "__main__":
-    asyncio.run(main())
+@app.on_event("startup")
+async def startup_event():
+    # Start the worker in the background
+    asyncio.create_task(run_worker())

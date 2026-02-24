@@ -26,4 +26,4 @@ COPY . .
 ENV CHROME_BIN=/usr/bin/chromium
 ENV CHROMEDRIVER_BIN=/usr/bin/chromedriver
 
-CMD ["sh", "-c", "exec python -m worker.main"]
+CMD ["sh", "-c", "exec gunicorn -k uvicorn.workers.UvicornWorker -b 0.0.0.0:${PORT:-8080} worker.main:app"]
