@@ -27,7 +27,7 @@ Neste fluxo, quatro serviços serão ativados:
 1. `teste-tecnico-senior-rpa-db-1`: O serviço em background para o **PostgreSQL**.
 2. `teste-tecnico-senior-rpa-rabbitmq-1`: O provedor interno de filas operando no **RabbitMQ**.
 3. `teste-tecnico-senior-rpa-worker-1`: O worker operando em Debian/Alpine e com a abstração do Crawler e do Chromium Headless inicializada e pronta para consumo da fila.
-4. `teste-tecnico-senior-rpa-api-1`: A **FastAPI** disponibilizada nativamente em modo hot-reload na porta interna `8000` localhost.
+4. `teste-tecnico-senior-rpa-api-1`: A **FastAPI** disponibilizada nativamente na porta interna `8000` (disponível externamente via Cloud Run).
 
 As tabelas e diagramas relacionais são instanciados por um script inserido na hierarquia de Eventos do FastAPI, operando em tempo de inicialização (lifespan) sem demandas posteriores e manuais do Alembic.
 
@@ -35,7 +35,7 @@ As tabelas e diagramas relacionais são instanciados por um script inserido na h
 
 Uma vez que o orquestrador `docker-compose` atestar saúde nas conexões dos serviços, é possível usufruir de uma rica interface de modelagem padronizada fornecida pelo Swagger, integrada às dependências da FastAPI:
 
-🔗 **[Acesso Gráfico Interativo aos Recursos: http://localhost:8000/docs](http://localhost:8000/docs)**
+🔗 **[Acesso Gráfico Interativo aos Recursos: https://api-891102047902.southamerica-east1.run.app/docs](https://api-891102047902.southamerica-east1.run.app/docs)**
 
 Utilizando o painel de rotas OpenAPI, os end-points de coleta paralela, listagem e requisições isoladas podem ser modelados, depurados e estruturados via interface nativa, não sendo obrigatória a verificação pura via terminal.
 
@@ -45,7 +45,7 @@ Os protocolos de consulta expostos via HTTP podem ser confirmados através de re
 
 **1. Solicitar o agrupamento e carga de todos os Scrapers (Oscar e Hockey) paralelamente:**
 ```bash
-curl -X POST http://localhost:8000/crawl/all
+curl -X POST https://api-891102047902.southamerica-east1.run.app/crawl/all
 ```
 Resposta da Solicitação (`HTTP 200`):
 ```json
@@ -58,7 +58,7 @@ Resposta da Solicitação (`HTTP 200`):
 **2. Consultar as Tabelas e Validar a Orquestração do Estado do Job:**
 ```bash
 # O retorno contém o Status atual da Orquestração. Troque o UUID inserido:
-curl http://localhost:8000/jobs/848a2ebc-f3eb-4c36-b60b-01754b992476
+curl https://api-891102047902.southamerica-east1.run.app/jobs/848a2ebc-f3eb-4c36-b60b-01754b992476
 ```
 Exemplo de Resposta do Sistema:
 ```json
@@ -73,7 +73,7 @@ Exemplo de Resposta do Sistema:
 **3. Adquirir o Resultado Armazenado via Consulta SQL do Banco (Representada pela API):**
 ```bash
 # Quando o status do job for 'completed', requisite os valores
-curl http://localhost:8000/results/848a2ebc-f3eb-4c36-b60b-01754b992476/results
+curl https://api-891102047902.southamerica-east1.run.app/results/848a2ebc-f3eb-4c36-b60b-01754b992476/results
 ```
 
 Para monitoria avançada das coletas em andamento ocorrendo de forma não iterativa por debaixo dos panos, utilize:
@@ -81,9 +81,9 @@ Para monitoria avançada das coletas em andamento ocorrendo de forma não iterat
 docker compose logs -f worker
 ```
 
-### ☁️ Testando via Cloud Run (Produção/Staging)
+### ☁️ Ambiente Cloud Run (Produção/Staging)
 
-A aplicação também está disponível via Google Cloud Run. Para realizar testes manuais no ambiente deployed, substitua o `localhost:8000` pela URL de deploy:
+A aplicação está disponível para uso imediato no Google Cloud Run através da URL de deploy:
 
 **API URL:** `https://api-891102047902.southamerica-east1.run.app/`
 
