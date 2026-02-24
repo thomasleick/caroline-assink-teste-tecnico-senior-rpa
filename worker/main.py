@@ -110,14 +110,21 @@ async def main() -> None:
     await start_health_server()
 
     logger.info("Connecting to RabbitMQ...")
-    connection = await get_rabbitmq_connection()
-    async with connection:
-        channel = await connection.channel()
-        await channel.set_qos(prefetch_count=1)
-        queue = await channel.declare_queue(QUEUE_NAME, durable=True)
-        logger.info(f"Worker started. Listening on queue '{QUEUE_NAME}'...")
-        await queue.consume(process_job)
-        await asyncio.Future()  # run forever
+    
+    retry_interval = 5
+    while True:
+        try:
+            connection = await get_rabbitmq_connection()
+            async with connection:
+                channel = await connection.channel()
+                await channel.set_qos(prefetch_count=1)
+                queue = await channel.declare_queue(QUEUE_NAME, durable=True)
+                logger.info(f"Worker started. Listening on queue '{QUEUE_NAME}'...")
+                await queue.consume(process_job)
+                await asyncio.Future()  # run forever until connection is lost
+        except Exception as e:
+            logger.error(f"Failed to connect to RabbitMQ: {e}. Retrying in {retry_interval}s...")
+            await asyncio.sleep(retry_interval)
 
 
 if __name__ == "__main__":

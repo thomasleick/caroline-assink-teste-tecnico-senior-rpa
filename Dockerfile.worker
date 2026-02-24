@@ -26,4 +26,4 @@ COPY . .
 ENV CHROME_BIN=/usr/bin/chromium
 ENV CHROMEDRIVER_BIN=/usr/bin/chromedriver
 
-CMD ["python", "-m", "worker.main"]
+CMD ["sh", "-c", "exec python -m worker.main"]
