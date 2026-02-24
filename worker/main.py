@@ -110,7 +110,7 @@ async def main() -> None:
     await start_health_server()
 
     logger.info("Connecting to RabbitMQ...")
-    
+
     retry_interval = 5
     while True:
         try:
@@ -123,7 +123,9 @@ async def main() -> None:
                 await queue.consume(process_job)
                 await asyncio.Future()  # run forever until connection is lost
         except Exception as e:
-            logger.error(f"Failed to connect to RabbitMQ: {e}. Retrying in {retry_interval}s...")
+            logger.error(
+                f"Failed to connect to RabbitMQ: {e}. Retrying in {retry_interval}s..."
+            )
             await asyncio.sleep(retry_interval)
 
 
