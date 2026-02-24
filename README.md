@@ -81,6 +81,17 @@ Para monitoria avançada das coletas em andamento ocorrendo de forma não iterat
 docker compose logs -f worker
 ```
 
+### ☁️ Testando via Cloud Run (Produção/Staging)
+
+A aplicação também está disponível via Google Cloud Run. Para realizar testes manuais no ambiente deployed, substitua o `localhost:8000` pela URL de deploy:
+
+**API URL:** `https://api-891102047902.southamerica-east1.run.app/`
+
+Exemplo de comando `curl` para o ambiente Cloud Run:
+```bash
+curl -X POST https://api-891102047902.southamerica-east1.run.app/crawl/all
+```
+
 ---
 
 ## 🧪 Validando a Lógica Interna Através dos Testes Automatizados (Pytest)
