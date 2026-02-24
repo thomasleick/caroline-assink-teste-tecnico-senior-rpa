@@ -8,18 +8,8 @@ import models  # noqa: F401 – ensures all models are registered with Base
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Create all tables on startup (idempotent)
-    from models.base import Base
-    import logging
-
-    logger = logging.getLogger("api.main")
-    try:
-        async with engine.begin() as conn:
-            await conn.run_sync(Base.metadata.create_all)
-        logger.info("Database tables verified/created successfully.")
-    except Exception as e:
-        logger.error(f"Failed to initialize database on startup: {e}")
-        logger.warning("API starting without database readiness check.")
+    # Database initialization removed for non-blocking startup in Cloud Run.
+    # Tables should be created via migrations or a separate initialization script.
     yield
 
 
