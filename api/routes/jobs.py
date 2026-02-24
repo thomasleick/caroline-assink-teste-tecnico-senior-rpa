@@ -23,7 +23,7 @@ async def list_jobs(db: AsyncSession = Depends(get_db)):
         logger.error(f"Failed to list jobs: {e}")
         raise HTTPException(
             status_code=503,
-            detail="Database connection failed. Please ensure DATABASE_URL is correctly configured."
+            detail="Database connection failed. Please ensure DATABASE_URL is correctly configured.",
         )
 
 
@@ -40,5 +40,5 @@ async def get_job(job_id: str, db: AsyncSession = Depends(get_db)):
         logger.error(f"Failed to get job {job_id}: {e}")
         raise HTTPException(
             status_code=503,
-            detail="Database connection failed. Please ensure DATABASE_URL is correctly configured."
+            detail="Database connection failed. Please ensure DATABASE_URL is correctly configured.",
         )

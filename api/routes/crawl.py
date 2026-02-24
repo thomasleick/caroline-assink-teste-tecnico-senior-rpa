@@ -26,7 +26,7 @@ async def create_job_and_publish(db: AsyncSession, task_type: str) -> str:
         logger.error(f"Failed to create job in database: {e}")
         raise HTTPException(
             status_code=503,
-            detail="Database connection failed. Please ensure DATABASE_URL is correctly configured."
+            detail="Database connection failed. Please ensure DATABASE_URL is correctly configured.",
         )
 
     try:
@@ -38,7 +38,7 @@ async def create_job_and_publish(db: AsyncSession, task_type: str) -> str:
         # If queue fails, we probably should mark the job as failed or just raise
         raise HTTPException(
             status_code=503,
-            detail="Queue connection failed. Please ensure RABBITMQ_URL is correctly configured."
+            detail="Queue connection failed. Please ensure RABBITMQ_URL is correctly configured.",
         )
 
     return new_job.id

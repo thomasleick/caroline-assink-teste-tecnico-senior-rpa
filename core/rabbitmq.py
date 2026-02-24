@@ -37,9 +37,7 @@ async def publish_message(queue_name: str, message: dict):
 async def check_rabbitmq_health() -> bool:
     """Simple check to verify RabbitMQ connectivity."""
     try:
-        connection = await aio_pika.connect_robust(
-            settings.RABBITMQ_URL, timeout=5
-        )
+        connection = await aio_pika.connect_robust(settings.RABBITMQ_URL, timeout=5)
         async with connection:
             return True
     except Exception as e:

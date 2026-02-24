@@ -31,7 +31,9 @@ async def get_job_results(job_id: str, db: AsyncSession = Depends(get_db)):
         )
         hockey_teams = hockey_result.scalars().all()
 
-        oscar_result = await db.execute(select(OscarFilm).where(OscarFilm.job_id == job_id))
+        oscar_result = await db.execute(
+            select(OscarFilm).where(OscarFilm.job_id == job_id)
+        )
         oscar_films = oscar_result.scalars().all()
 
         return {"hockey": hockey_teams, "oscar": oscar_films}
@@ -41,7 +43,7 @@ async def get_job_results(job_id: str, db: AsyncSession = Depends(get_db)):
         logger.error(f"Failed to get results for job {job_id}: {e}")
         raise HTTPException(
             status_code=503,
-            detail="Database connection failed. Please ensure DATABASE_URL is correctly configured."
+            detail="Database connection failed. Please ensure DATABASE_URL is correctly configured.",
         )
 
 
@@ -54,7 +56,7 @@ async def list_hockey_results(db: AsyncSession = Depends(get_db)):
         logger.error(f"Failed to list hockey results: {e}")
         raise HTTPException(
             status_code=503,
-            detail="Database connection failed. Please ensure DATABASE_URL is correctly configured."
+            detail="Database connection failed. Please ensure DATABASE_URL is correctly configured.",
         )
 
 
@@ -67,5 +69,5 @@ async def list_oscar_results(db: AsyncSession = Depends(get_db)):
         logger.error(f"Failed to list oscar results: {e}")
         raise HTTPException(
             status_code=503,
-            detail="Database connection failed. Please ensure DATABASE_URL is correctly configured."
+            detail="Database connection failed. Please ensure DATABASE_URL is correctly configured.",
         )
