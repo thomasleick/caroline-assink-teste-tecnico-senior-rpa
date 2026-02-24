@@ -11,7 +11,7 @@ class Settings(BaseSettings):
     PROJECT_NAME: str = "RPA Challenge"
 
     # DB Configuration
-    DATABASE_URL: str = "postgresql+asyncpg://rpa_user:rpa_pass@localhost:5432/rpa_db"
+    DATABASE_URL: str = "postgresql+asyncpg://postgres:3%40%7CDh%7DL3%228%5Ey%3B%25Rc@34.95.152.162:5432/rpa"
 
     # RabbitMQ Configuration
     RABBITMQ_URL: str = "amqp://guest:guest@localhost:5672/"
@@ -24,8 +24,8 @@ class Settings(BaseSettings):
     @classmethod
     def validate_database_url(cls, v: str) -> str:
         if not v or not isinstance(v, str) or v.strip() == "":
-            logger.warning("DATABASE_URL is empty. Falling back to default local URL.")
-            return "postgresql+asyncpg://rpa_user:rpa_pass@localhost:5432/rpa_db"
+            logger.warning("DATABASE_URL is empty. Falling back to default cloud URL.")
+            return "postgresql+asyncpg://postgres:3%40%7CDh%7DL3%228%5Ey%3B%25Rc@34.95.152.162:5432/rpa"
         if "postgresql+asyncpg://" not in v:
             logger.error(f"Invalid DATABASE_URL format: {v}")
             # We don't raise here to allow the app to boot, but it will fail later with SQLAlchemy error if not fixed.
