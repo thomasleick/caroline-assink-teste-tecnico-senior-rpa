@@ -48,19 +48,39 @@ async def _run_hockey(job_id: str) -> None:
 
 async def _run_oscar(job_id: str) -> None:
     logger.info(f"[{job_id}] Starting Oscar scraper (Selenium)...")
-    # Selenium is synchronous; run in thread pool to avoid blocking event loop
-    from typing import cast, List, Dict, Any
+    # Selenium is synchronous and now a generator;
+    # we need to run each step in the executor to avoid blocking.
 
-    loop = asyncio.get_running_loop()
-    films: List[Dict[str, Any]] = cast(
-        List[Dict[str, Any]],
-        await loop.run_in_executor(_executor, scrape_oscar_films),
-    )
-    async with async_session_maker() as session:
-        for film in films:
-            session.add(OscarFilm(job_id=job_id, **film))
-        await session.commit()
-    logger.info(f"[{job_id}] Saved {len(films)} Oscar records.")
+    def get_generator():
+        return scrape_oscar_films()
+
+    # Get the generator instance
+    gen = await asyncio.get_running_loop().run_in_executor(_executor, get_generator)
+
+    total_saved = 0
+    while True:
+        try:
+            # Get next batch of films (next year)
+            films = await asyncio.get_running_loop().run_in_executor(
+                _executor, next, gen
+            )
+
+            async with async_session_maker() as session:
+                for film in films:
+                    session.add(OscarFilm(job_id=job_id, **film))
+                await session.commit()
+
+            year = films[0]["year"] if films else "unknown"
+            logger.info(f"[{job_id}] Saved {len(films)} Oscar records for year {year}.")
+            total_saved += len(films)
+
+        except StopIteration:
+            break
+        except Exception as e:
+            logger.error(f"[{job_id}] Error during Oscar incremental save: {e}")
+            raise
+
+    logger.info(f"[{job_id}] Finished Oscar scraper. Total saved: {total_saved}")
 
 
 async def process_job(message: aio_pika.abc.AbstractIncomingMessage) -> None:

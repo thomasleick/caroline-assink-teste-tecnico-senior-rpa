@@ -29,6 +29,11 @@ def _build_driver() -> webdriver.Chrome:
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--disable-gpu")
     options.add_argument("--window-size=1920,1080")
+    # In Docker, we use the variables set in the Dockerfile
+    import os
+
+    chrome_bin = os.getenv("CHROME_BIN", "/usr/bin/chromium")
+    options.binary_location = chrome_bin
     return webdriver.Chrome(options=options)
 
 
@@ -63,13 +68,11 @@ def _parse_films_from_table(driver: webdriver.Chrome) -> List[Dict[str, Any]]:
     return films
 
 
-def scrape_oscar_films() -> List[Dict[str, Any]]:
+def scrape_oscar_films():
     """
     Crawls the Oscar page year by year, clicking each year button,
-    waiting for the AJAX table to load, and scraping the results.
-    Returns all films across all years.
+    waiting for the AJAX table to load, and yielding the results.
     """
-    all_films: List[Dict[str, Any]] = []
     driver = _build_driver()
 
     try:
@@ -102,17 +105,14 @@ def scrape_oscar_films() -> List[Dict[str, Any]]:
                     (By.CSS_SELECTOR, "table.table tbody tr.film")
                 )
             )
-            time.sleep(0.5)  # Small buffer for full render
+            time.sleep(1)  # Buffer for full render
 
             films = _parse_films_from_table(driver)
             for film in films:
                 film["year"] = year  # Tag with the year
 
             logger.info(f"Year {year}: {len(films)} films scraped.")
-            all_films.extend(films)
+            yield films
 
     finally:
         driver.quit()
-
-    logger.info(f"Total Oscar films scraped: {len(all_films)}")
-    return all_films
